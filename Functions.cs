@@ -11,12 +11,6 @@ namespace Translator;
 
 public class Functions
 {
-    IAmazonTranslate _translateClient;
-
-    public Functions(IAmazonTranslate translateClient)
-    {
-        this._translateClient = translateClient;
-    }
     /// <summary>
     /// A simple function that accepts a body of text, and two query string parameters
     /// indicating the source and target language. The body of text is converted
@@ -27,7 +21,7 @@ public class Functions
     /// <returns>The translated text</returns>
     [LambdaFunction]
     [HttpApi(LambdaHttpMethod.Post, "/")]
-    public async Task<string> TranslateText([FromQuery]string inputCode, [FromQuery]string outputCode, [FromBody]string text2Convert, ILambdaContext context)
+    public async Task<string> TranslateText([FromServices] IAmazonTranslate translateClient, [FromQuery]string inputCode, [FromQuery]string outputCode, [FromBody]string text2Convert, ILambdaContext context)
     {
         try
         {
@@ -42,7 +36,7 @@ public class Functions
                 }
             };
 
-            var response = await _translateClient.TranslateTextAsync(request);
+            var response = await translateClient.TranslateTextAsync(request);
 
             return response.TranslatedText;
         }
