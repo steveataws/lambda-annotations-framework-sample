@@ -1,5 +1,6 @@
 using Amazon.Lambda.Core;
-using Amazon.Lambda.APIGatewayEvents;
+using Amazon.Lambda.Annotations;
+using Amazon.Lambda.Annotations.APIGateway;
 using Amazon.Translate;
 using Amazon.Translate.Model;
 
@@ -18,7 +19,9 @@ public class Functions
     /// <param name="apigProxyEvent"></param>
     /// <param name="context"></param>
     /// <returns>The translated text</returns>
-    public async Task<APIGatewayHttpApiV2ProxyResponse> TranslateText(APIGatewayHttpApiV2ProxyRequest apigProxyEvent, ILambdaContext context)
+    [LambdaFunction]
+    [HttpApi(LambdaHttpMethod.Post, "/")]
+    public async Task<string> TranslateText([FromQuery]string input, [FromQuery]string output, [FromBody]string text2Convert, ILambdaContext context)
     {
         var translateClient = new AmazonTranslateClient();
 
@@ -26,9 +29,9 @@ public class Functions
         {
             var request = new TranslateTextRequest
             {
-                SourceLanguageCode = apigProxyEvent.QueryStringParameters["sourceLang"],
-                TargetLanguageCode = apigProxyEvent.QueryStringParameters["targetLang"],
-                Text = apigProxyEvent.Body,
+                SourceLanguageCode = input,
+                TargetLanguageCode = output,
+                Text = text2Convert,
                 Settings = new TranslationSettings
                 {
                     Profanity = Profanity.MASK
@@ -36,12 +39,8 @@ public class Functions
             };
 
             var response = await translateClient.TranslateTextAsync(request);
-            return new APIGatewayHttpApiV2ProxyResponse
-            {
-                Body = response.TranslatedText,
-                StatusCode = 200,
-                Headers = new Dictionary<string, string> { { "Content-Type", "text/plain" } }
-            };
+
+            return response.TranslatedText;
         }
         catch (AmazonTranslateException e)
         {

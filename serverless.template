@@ -3,24 +3,27 @@
   "Transform": "AWS::Serverless-2016-10-31",
   "Description": "An AWS Serverless Application.",
   "Resources": {
-    "TranslateTextFunction": {
+    "TranslatorFunctionsTranslateTextGenerated": {
       "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations",
+        "SyncedEvents": [
+          "RootPost"
+        ]
+      },
       "Properties": {
-        "Architectures": [
-          "x86_64"
-        ],
-        "Handler": "Translator::Translator.Functions::TranslateText",
         "Runtime": "dotnet6",
-        "CodeUri": "",
+        "CodeUri": ".",
         "MemorySize": 256,
         "Timeout": 30,
-        "Role": null,
         "Policies": [
           "AWSLambdaBasicExecutionRole",
           "TranslateReadOnly"
         ],
+        "PackageType": "Zip",
+        "Handler": "Translator::Translator.Functions_TranslateText_Generated::TranslateText",
         "Events": {
-          "RootGet": {
+          "RootPost": {
             "Type": "HttpApi",
             "Properties": {
               "Path": "/",
